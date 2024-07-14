@@ -1,0 +1,400 @@
+---
+title:"ggplot 2 application about regression, PCA, kernel PCA......"
+---
+
+# correlation between mpg and others
+```{r}
+library(dplyr)
+library(ggplot2)
+library(corrplot)
+
+data <- mtcars
+
+# Define the dependent and independent variables
+dependent_var <- "mpg"
+independent_vars <- colnames(data)[colnames(data) != dependent_var]
+
+# Filter numeric independent variables and skip non-numeric and 0,1 values
+numeric_independent_vars <- independent_vars[sapply(independent_vars, function(var) {
+  is.numeric(data[[var]]) && length(unique(data[[var]])) > 2
+})]
+
+# Initialize the results data frame
+results <- data.frame(variable = character(), coefficient = numeric(), p_value = numeric(), R2 = numeric(), stringsAsFactors = FALSE)
+
+# Calculate regression coefficients, p-values, and R2
+for (var in numeric_independent_vars) {
+  lm_model <- lm(data[[dependent_var]] ~ data[[var]], data = data)
+  summary_lm <- summary(lm_model)
+  coefficient <- summary_lm$coefficients[2, 1]
+  p_value <- summary_lm$coefficients[2, 4]
+  R2 <- summary_lm$r.squared
+  
+  results <- rbind(results, data.frame(variable = var, coefficient = coefficient, p_value = p_value, R2 = R2))
+}
+
+# Sort the results by R2 and select the top 25 variables
+top25_df <- results %>% arrange(desc(R2)) %>% head(25)
+
+# Plot a bar chart with R2 and p-values
+ggplot(top25_df, aes(x = reorder(variable, -R2), y = R2, fill = p_value)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = paste0("R^2 = ", round(R2, 2), ", p = ", format.pval(p_value, digits = 2))), 
+            hjust = -0.2, size = 3, color = "black") +
+  coord_flip() +
+  scale_fill_gradient(low = "red", high = "blue", name = "p-value") +
+  labs(title = "Top 25 R-squared Values of Independent Variables with mpg",
+       x = "Independent Variables",
+       y = "R-squared") +
+  theme_minimal() +
+  theme(axis.text.y = element_text(size = 10),
+        legend.position = "right")
+
+
+```
+
+
+
+
+
+
+# ggplot---- binary variables propotion with points distribution
+```{r}
+
+# Clear the environment
+rm(list = ls())
+
+# Load necessary packages
+library(dplyr)
+library(ggplot2)
+library(gridExtra) # For combining plots
+library(tidyr)
+
+# Use the mtcars dataset
+data <- mtcars
+
+# Check if there are data points
+if (nrow(data) == 0) {
+  stop("No available data points. Please check the data file and column names.")
+}
+
+# Descriptive statistical analysis
+summary_stats <- data %>%
+  group_by(am) %>%
+  summarise(
+    mean_mpg = mean(mpg),
+    mean_hp = mean(hp)
+  )
+print(summary_stats)
+
+# Scatter plot: Show the distribution of mpg and hp at different factor levels
+scatter_plot <- ggplot(data, aes(x = mpg, y = hp, color = as.factor(am))) +
+  geom_point(size = 3, alpha = 0.6) +
+  theme_minimal() +
+  labs(title = "Scatter Plot of mpg and hp by am",
+       x = "mpg",
+       y = "hp",
+       color = "am")
+
+# Stacked histogram: Show the proportion of am as 0 and 1
+hist_plot <- ggplot(data, aes(x = hp, fill = as.factor(am))) +
+  geom_histogram(position = "fill", binwidth = 5, color = "black") +
+  theme_minimal() +
+  labs(title = "Proportion Histogram of hp by am",
+       x = "hp",
+       y = "Proportion",
+       fill = "am")
+
+# Combine the two plots together
+grid.arrange(scatter_plot, hist_plot, ncol = 1)
+
+
+```
+## logistic regression
+
+```{r}
+# Clear the environment
+rm(list = ls())
+
+# Load necessary packages
+library(dplyr)
+library(ggplot2)
+library(glmnet)
+
+# Use the mtcars dataset
+data <- mtcars
+
+# Create a binary outcome variable
+data$mpg_binary <- ifelse(data$mpg > median(data$mpg), 1, 0)
+
+# Prepare the data for glmnet
+x <- as.matrix(data[, c("hp", "am")])
+y <- data$mpg_binary
+
+# Fit a logistic regression model with lasso regularization
+cv_model <- cv.glmnet(x, y, alpha = 1, family = "binomial")
+
+# Get the best lambda value
+best_lambda <- cv_model$lambda.min
+
+# Fit the final model using the best lambda value
+final_model <- glmnet(x, y, alpha = 1, family = "binomial", lambda = best_lambda)
+
+# Print the coefficients of the final model
+coef(final_model)
+
+# Summary of the model
+summary(cv_model)
+
+# Predict the probabilities on the training set
+predicted_probabilities <- predict(final_model, newx = x, type = "response")
+
+# Add the predicted probabilities to the data
+data$predicted_probabilities <- predicted_probabilities
+
+# Print the data with predicted probabilities
+print(data)
+
+
+```
+
+```{r}
+# Clear the environment
+rm(list = ls())
+
+# Load necessary packages
+library(dplyr)
+
+# Use the mtcars dataset
+data <- mtcars
+
+# Create a binary outcome variable
+data$mpg_binary <- ifelse(data$mpg > median(data$mpg), 1, 0)
+
+# Fit the null model (intercept only)
+null_model <- glm(mpg_binary ~ 1, data = data, family = "binomial")
+
+# Fit the full model (with predictors)
+full_model <- glm(mpg_binary ~ hp + am, data = data, family = "binomial")
+
+# Print the summaries of both models
+summary(null_model)
+summary(full_model)
+
+# Extract the null deviance and the residual deviance
+null_deviance <- null_model$deviance
+residual_deviance <- full_model$deviance
+
+# Extract the degrees of freedom
+null_df <- null_model$df.residual
+residual_df <- full_model$df.residual
+
+# Calculate the Chi-square statistic
+chi_square <- null_deviance - residual_deviance
+
+# Calculate the degrees of freedom for the test
+df_diff <- null_df - residual_df
+
+# Calculate the p-value
+p_value <- pchisq(chi_square, df = df_diff, lower.tail = FALSE)
+
+# Print the results
+cat("Chi-square value:", chi_square, "\n")
+cat("Degrees of freedom:", df_diff, "\n")
+cat("p-value:", p_value, "\n")
+
+```
+The warning "fitted probabilities numerically 0 or 1 occurred" in logistic regression usually indicates that the model is perfectly separating the data points, which can cause issues with the maximum likelihood estimation. This might happen if the predictors can perfectly predict the outcome for some observations, resulting in probabilities very close to 0 or 1.
+
+
+
+You can still proceed with the Likelihood Ratio Test (LRT), but be aware of potential issues with the model's estimates. 
+The warning "fitted probabilities numerically 0 or 1 occurred" suggests perfect separation, which might be due to the small sample size or strong predictors. You might want to consider:
+
+
+
+Regularization: Apply regularization techniques like ridge or lasso regression.
+
+
+
+Bayesian Logistic Regression: Consider using a Bayesian approach which can handle perfect separation better.
+
+
+
+
+Check for Data Issues: Ensure that there are no issues like highly imbalanced data or outliers affecting the model.
+
+
+
+
+However, if your primary goal is to perform the LRT, you can proceed with the above steps, keeping in mind the warning and its implications.
+
+
+
+
+# Kernel PCA with iris data example with cross validation
+```{r}
+# Clear the environment
+rm(list = ls())
+
+# Load necessary packages
+library(ggplot2)
+library(dplyr)
+library(kernlab)
+library(caret)
+
+# Set random seed
+set.seed(153)
+
+# Use the iris dataset
+data <- iris
+
+# Select variables for Kernel PCA
+variables <- c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")
+
+# Standardize the data
+scaled_data <- scale(data[variables])
+outcome <- data$Species
+
+# Define candidate sets of kernel functions and parameters
+kernels <- c("rbfdot", "polydot")
+sigmas <- c(0.01, 0.05, 0.1, 0.2, 0.5)
+degrees <- 1:3
+scales <- c(1, 0.1, 0.01)
+
+# Define cross-validation parameters
+train_control <- trainControl(method = "cv", number = 5)
+
+# Define a data frame to store the results
+results_df <- data.frame(Kernel = character(), Sigma = numeric(), Degree = numeric(), Scale = numeric(), Accuracy = numeric(), stringsAsFactors = FALSE)
+
+# Perform cross-validation
+#Cross-Validation Setup:
+
+#trainControl(method = "cv", number = 5) sets up 5-fold #cross-validation for model training.
+#Cross-Validation Loop:
+
+#Nested loops iterate over kernel functions and their respective parameters.
+#kpca performs Kernel PCA with the specified kernel and parameters.
+#train trains an SVM model using the principal components and #computes the cross-validated accuracy.
+#results_df stores the accuracy for each combination of parameters.
+for (kernel in kernels) {
+  if (kernel == "rbfdot") {
+    for (sigma in sigmas) {
+      kpc <- kpca(~ ., data = as.data.frame(scaled_data), kernel = kernel, kpar = list(sigma = sigma), features = 2)
+      pc_data <- as.data.frame(pcv(kpc))
+      colnames(pc_data) <- c("PC1", "PC2")
+      pc_data$outcome <- outcome
+      
+      model <- train(outcome ~ ., data = pc_data, method = "svmRadial", trControl = train_control)
+      accuracy <- mean(model$results$Accuracy)
+      
+      results_df <- rbind(results_df, data.frame(Kernel = kernel, Sigma = sigma, Degree = NA, Scale = NA, Accuracy = accuracy))
+    }
+  } else if (kernel == "polydot") {
+    for (degree in degrees) {
+      for (scale in scales) {
+        kpc <- kpca(~ ., data = as.data.frame(scaled_data), kernel = kernel, kpar = list(degree = degree, scale = scale), features = 2)
+        pc_data <- as.data.frame(pcv(kpc))
+        colnames(pc_data) <- c("PC1", "PC2")
+        pc_data$outcome <- outcome
+        
+        model <- train(outcome ~ ., data = pc_data, method = "svmRadial", trControl = train_control)
+        accuracy <- mean(model$results$Accuracy)
+        
+        results_df <- rbind(results_df, data.frame(Kernel = kernel, Sigma = NA, Degree = degree, Scale = scale, Accuracy = accuracy))
+      }
+    }
+  }
+}
+
+# Print the best parameter combination and the corresponding accuracy
+best_params <- results_df[which.max(results_df$Accuracy), ]
+print(best_params)
+
+# Perform Kernel PCA and visualize using the best parameter combination
+best_kernel <- as.character(best_params$Kernel)
+best_sigma <- as.numeric(as.character(best_params$Sigma))
+best_degree <- as.numeric(as.character(best_params$Degree))
+best_scale <- as.numeric(as.character(best_params$Scale))
+
+if (best_kernel == "rbfdot") {
+  kpc_best <- kpca(~ ., data = as.data.frame(scaled_data), kernel = best_kernel, kpar = list(sigma = best_sigma), features = 2)
+} else if (best_kernel == "polydot") {
+  kpc_best <- kpca(~ ., data = as.data.frame(scaled_data), kernel = best_kernel, kpar = list(degree = best_degree, scale = best_scale), features = 2)
+}
+
+pc_best_data <- as.data.frame(pcv(kpc_best))
+colnames(pc_best_data) <- c("PC1", "PC2")
+pc_best_data$outcome <- outcome
+
+ggplot(pc_best_data, aes(x = PC1, y = PC2, color = outcome)) +
+  geom_point(size = 2, alpha = 0.6) +
+  theme_minimal() +
+  labs(title = paste("Kernel PCA (", best_kernel, " Kernel) Plot of Iris Data", sep = ""),
+       x = "Principal Component 1",
+       y = "Principal Component 2",
+       color = "Outcome")
+
+```
+Accuracy Calculation:
+The accuracy of each SVM model trained on the principal components is obtained using train from the caret package.
+train performs cross-validation, and mean(model$results$Accuracy) computes the average accuracy across the folds.
+This accuracy reflects how well the SVM model classifies the species based on the principal components derived from Kernel PCA.
+
+
+
+
+# PCA--not very good example
+```{r}
+# Clear the environment
+rm(list = ls())
+
+# Load necessary packages
+library(ggplot2)
+library(dplyr)
+library(factoextra)  # For PCA visualization
+library(FactoMineR)  # For PCA analysis
+
+# Use the iris dataset
+data <- iris
+
+# Select variables for PCA
+variables <- c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")
+
+# Standardize the data
+scaled_data <- scale(data[variables])
+
+# Perform PCA
+pca_result <- PCA(scaled_data, graph = FALSE)
+
+# Print PCA results
+print(pca_result)
+
+# Visualize PCA results
+# Variable factor map
+fviz_pca_var(pca_result, col.var = "contrib", gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), repel = TRUE)
+
+# Individual factor map colored by species
+fviz_pca_ind(pca_result, col.ind = data$Species, palette = c("#00AFBB", "#E7B800", "#FC4E07"), addEllipses = TRUE, legend.title = "Species")
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 
