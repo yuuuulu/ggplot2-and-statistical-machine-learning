@@ -1,0 +1,97 @@
+# Load necessary libraries
+library(survival)
+library(dplyr)
+library(ggplot2)
+library(gbm)
+library(parallel)
+library(doParallel)
+library(foreach)
+
+# Using the built-in lung dataset in R
+data("lung")
+data <- lung
+
+# Data preprocessing
+data$status <- ifelse(data$status == 2, 1, 0)  # Convert status to binary (0,1)
+
+# Create a survival object
+surv_object <- Surv(time = data$time, event = data$status)
+
+# Define variables
+variables <- c("age", "sex", "ph.ecog", "ph.karno", "pat.karno", "meal.cal", "wt.loss")
+combinations <- unlist(lapply(1:length(variables), function(x) combn(variables, x, simplify = FALSE)), recursive = FALSE)
+
+# Initialize results data frame
+results <- data.frame(Model = character(), p = integer(), AIC = numeric(), BIC = numeric(), RSS = numeric(), R2 = numeric(), Adj_R2 = numeric(), Cp = numeric(), LogLikelihood = numeric(), Cindex = numeric(), Significant = logical(), stringsAsFactors = FALSE)
+coefficients_info <- data.frame(Model = character(), Coefficient = character(), Estimate = numeric(), StdError = numeric(), tStatistic = numeric(), pValue = numeric(), stringsAsFactors = FALSE)
+
+# Calculate metrics for each model
+for (combo in combinations) {
+  formula <- as.formula(paste("surv_object ~", paste(combo, collapse = " + ")))
+  cox_fit <- coxph(formula, data = data)
+  
+  rss <- sum(residuals(cox_fit, type = "deviance")^2)
+  
+  # Calculate R^2 and adjusted R^2
+  n <- nrow(data)
+  p <- length(cox_fit$coefficients)
+  r2 <- 1 - rss / sum((data$time - mean(data$time))^2)
+  adj_r2 <- 1 - (1 - r2) * ((n - 1) / (n - p - 1))
+  
+  mse <- rss / (n - p)
+  cp <- rss / mse - (n - 2 * p)
+  
+  # Calculate log-likelihood
+  log_likelihood <- logLik(cox_fit)[1]
+  
+  # Calculate C-index
+  c_index <- summary(cox_fit)$concordance[1]
+  
+  # Check significance
+  significant <- any(summary(cox_fit)$coefficients[, "Pr(>|z|)"] < 0.05)
+  
+  # Store model results
+  results <- rbind(results, data.frame(
+    Model = paste(combo, collapse = " + "),
+    p = p,
+    AIC = AIC(cox_fit),
+    BIC = BIC(cox_fit),
+    RSS = rss,
+    R2 = r2,
+    Adj_R2 = adj_r2,
+    Cp = cp,
+    LogLikelihood = log_likelihood,
+    Cindex = c_index,
+    Significant = significant
+  ))
+  
+  # Extract model coefficients and significance
+  coeffs <- summary(cox_fit)$coefficients
+  for (i in 1:nrow(coeffs)) {
+    coefficients_info <- rbind(coefficients_info, data.frame(
+      Model = paste(combo, collapse = " + "),
+      Coefficient = rownames(coeffs)[i],
+      Estimate = coeffs[i, "coef"],
+      StdError = coeffs[i, "se(coef)"],
+      tStatistic = coeffs[i, "z"],
+      pValue = coeffs[i, "Pr(>|z|)"]
+    ))
+  }
+}
+
+# Print results
+print(results)
+print(coefficients_info)
+
+# Filter models with significant variables
+significant_models <- results %>% filter(Significant)
+
+# Plot significant models
+significant_plot <- ggplot(significant_models, aes(x = 1, y = seq_along(Model), label = Model)) +
+  geom_text(color = "orange", fontface = "bold") +
+  labs(title = "Models with Significant Variables", x = "", y = "") +
+  theme_void() +
+  theme(axis.text.y = element_blank(), plot.title = element_text(hjust = 0.5))
+
+# Print significant models plot
+print(significant_plot)
