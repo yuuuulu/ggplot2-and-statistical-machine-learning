@@ -2,7 +2,7 @@
 title:"ggplot 2 application about regression, PCA, kernel PCA......"
 ---
 
-# correlation between mpg and others
+# correlation between mpg and others(r data example)
 ```{r}
 library(dplyr)
 library(ggplot2)
