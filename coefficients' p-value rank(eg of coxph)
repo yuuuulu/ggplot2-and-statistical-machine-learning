@@ -97,3 +97,7 @@ significant_plot <- ggplot(significant_models, aes(x = 1, y = seq_along(Model), 
 
 # Print significant models plot
 print(significant_plot)
+
+
+## After comparing variables we continue to select models
+## summary of model selection ways (from Regression Analysis)
