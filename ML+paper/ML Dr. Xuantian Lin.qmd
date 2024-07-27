@@ -1,0 +1,127 @@
+---
+title: "ML"
+---
+
+# Thanks to Dr. Mu He to recommend Learning to Answer Yes/No :: Guarantee of PLA \@ Machine Learning Foundations (機器學習基石) to me.
+
+## PLA
+
+### Introduction
+
+The Perceptron Learning Algorithm (PLA) is a fundamental algorithm in machine learning for binary classification. This document provides a detailed proof of the convergence of the PLA, demonstrating that the algorithm will halt after a finite number of updates if the data is linearly separable.
+
+### Key Definitions and Assumptions
+
+We start with the following assumptions and definitions:
+
+-   **Linearly Separable Data**: There exists a weight vector ( w\^\* ) and a bias ( b\^\* ) such that for all training examples ((x_i, y_i)):
+
+    $$
+    y_i (w^* \cdot x_i + b^*) > 0
+    $$
+
+-   **Normalized Weight Vector**: Normalize ( w\^\* ) such that ( \|\|w\^\*\|\| = 1 ).
+
+### Perceptron Algorithm Updates
+
+The Perceptron Learning Algorithm updates the weight vector ( w ) and bias ( b ) according to the following rule:
+
+$$
+w_{t+1} = w_t + y_i x_i
+$$ $$
+b_{t+1} = b_t + y_i
+$$
+
+Margin Definition
+
+Define the margin (\gamma) as:
+
+$$
+\gamma = \min_{i} \frac{y_i (w^* \cdot x_i)}{||x_i||}
+$$
+
+This is the minimum distance from the data points to the decision boundary defined by ( w\^\* ). Mistake-Driven Updates
+
+The weight vector ( w_t ) is changed only when a mistake is made, i.e., when:
+
+$$
+\text{sign}(w_t \cdot x_{n(t)}) \neq y_{n(t)} \implies y_{n(t)} w_t^T x_{n(t)} \leq 0
+$$
+
+Bounding the Norm of ( w_t )
+
+A mistake "limits" the growth of ( \|\|w_t\|\|\^2 ), even when updating with the "longest" ( x_n ). Consider the update rule:
+
+$$
+||w_{t+1}||^2 = ||w_t + y_{n(t)} x_{n(t)}||^2
+$$ $$
+= ||w_t||^2 + 2 y_{n(t)} w_t^T x_{n(t)} + ||y_{n(t)} x_{n(t)}||^2
+$$ $$
+\leq ||w_t||^2 + 0 + ||y_{n(t)} x_{n(t)}||^2
+$$ $$
+\leq ||w_t||^2 + \max_n ||y_n x_n||^2
+$$
+
+Starting from ( w_0 = 0 )
+
+Starting from ( w_0 = 0 ), after ( T ) mistake corrections, we have:
+
+$$
+\frac{w_T \cdot w^*}{||w_T||} \geq \sqrt{T} \cdot \text{constant}
+$$
+
+Dot Product Analysis
+
+Analyze the dot product of ( w_t ) with ( w\^\* ):
+
+$$
+w_{t+1} \cdot w^* = (w_t + y_i x_i) \cdot w^*
+$$ $$
+= w_t \cdot w^* + y_i (w^* \cdot x_i)
+$$ $$
+\geq w_t \cdot w^* + \gamma ||x_i||
+$$
+
+Bounding the Number of Mistakes
+
+Using the above inequalities, we can bound the number of updates ( t ) needed to achieve convergence. From the dot product analysis:
+
+$$
+w_t \cdot w^* \geq t \gamma ||x_i||
+$$
+
+From the norm analysis:
+
+$$
+||w_t||^2 \leq t ||x_i||^2
+$$
+
+Combining these, we get:
+
+$$
+\frac{w_t \cdot w^*}{||w_t||} \geq \frac{t \gamma ||x_i||}{\sqrt{t} ||x_i||}
+$$ $$
+\Rightarrow \sqrt{t} \leq \frac{||w^*||}{\gamma}
+$$ $$
+\Rightarrow t \leq \left( \frac{||w^*||}{\gamma} \right)^2
+$$
+
+Since ( \|\|w\^\*\|\| = 1 ), we get:
+
+$$
+t \leq \frac{1}{\gamma^2}
+$$
+
+### Conclusion
+
+The proof shows that the Perceptron Learning Algorithm will make a finite number of mistakes (updates) before converging to a solution that correctly classifies all the training data, provided the data is linearly separable. The number of updates is bounded by ( \frac{1}{\gamma^2} ), where ( \gamma ) is the margin of separation between the classes. This formal analysis demonstrates the convergence and correctness of the iterative process used by the PLA.
+
+#### Explanation of Constant in the video
+
+The term `constant` in the equation
+
+$$
+\frac{w_T \cdot w^*}{||w_T||} \geq \sqrt{T} \cdot \text{constant}
+$$
+
+refers to a value that depends on the characteristics of the data, particularly the margin (\gamma). The margin (\gamma) is the minimum distance from any data point to the decision boundary. This constant reflects how well-separated the classes are in the feature space. In practical terms, a larger margin (or greater separation) leads to a smaller constant, implying that the algorithm will converge more quickly.
