@@ -5,6 +5,7 @@ title: "ML"
 # Thanks to Dr. Mu He for recommending @ Machine Learning Foundations (機器學習基石) to me.
 
 ## PLA
+simple, fast, and used to each dimention
 
 ### Introduction
 
