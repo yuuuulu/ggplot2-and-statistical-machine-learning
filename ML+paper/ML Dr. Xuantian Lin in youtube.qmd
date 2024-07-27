@@ -2,7 +2,7 @@
 title: "ML"
 ---
 
-# Thanks to Dr. Mu He to recommend Learning to Answer Yes/No :: Guarantee of PLA \@ Machine Learning Foundations (機器學習基石) to me.
+# Thanks to Dr. Mu He for recommending @ Machine Learning Foundations (機器學習基石) to me.
 
 ## PLA
 
