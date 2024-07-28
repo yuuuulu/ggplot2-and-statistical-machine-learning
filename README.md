@@ -1,3 +1,5 @@
+## pdf
+Download pdfs to view if you are interested in my detailed notes of @ Machine Learning Foundations (機器學習基石) and our first paper in a mathematical modeling contest during the 2023.2.
 ## ML
 Thanks to Dr. Mu He for recommending @ Machine Learning Foundations (機器學習基石) to me. 
 
