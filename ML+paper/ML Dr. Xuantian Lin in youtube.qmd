@@ -126,3 +126,93 @@ $$
 $$
 
 refers to a value that depends on the characteristics of the data, particularly the margin (\gamma). The margin (\gamma) is the minimum distance from any data point to the decision boundary. This constant reflects how well-separated the classes are in the feature space. In practical terms, a larger margin (or greater separation) leads to a smaller constant, implying that the algorithm will converge more quickly.
+
+
+
+# Why could machine learn? 
+The Theorem of Generalization ensures it by guaranteeing $E_in$ approximately equal to $E_out$, which could be small. We could explain it from the very beginning which is an interesting and logical process.
+## simple intro first
+
+
+Unknown target function:
+
+$$
+f : \mathcal{X} \rightarrow \mathcal{Y}
+$$
+
+Training examples:
+
+$$
+D : (x_1, y_1), \cdots, (x_N, y_N)
+$$
+
+Hypothesis set:
+
+$$
+\mathcal{H}
+$$
+
+Learning algorithm:
+
+$$
+\mathcal{A}
+$$
+
+Unknown distribution on \( \mathcal{X} \):
+
+$$
+P
+$$
+
+Final hypothesis approximating \( f \):
+
+$$
+g \approx f
+$$
+
+'Worst case' guarantee on generalization
+
+
+## target f and g
+## eg of 2D pr
+## PAL based on concentration ..
+## 
+
+
+
+
+# $$
+\forall g = \mathcal{A}(\mathcal{D}) \in \mathcal{H} \text{ and 'statistical' large } \mathcal{D}, \text{ for } N \ge 2, k \ge 3
+$$
+
+$$
+\mathbb{P}_{\mathcal{D}} \left[ | E_{\text{in}}(g) - E_{\text{out}}(g) | > \epsilon \right]
+\le
+\mathbb{P}_{\mathcal{D}} \left[ \exists h \in \mathcal{H} \text{ s.t. } | E_{\text{in}}(h) - E_{\text{out}}(h) | > \epsilon \right]
+\le
+4 m_{\mathcal{H}}(2N) \exp \left( -\frac{1}{8} \epsilon^2 N \right)
+$$
+
+$$
+\text{if } k \text{ exists}
+\le
+4 (2N)^{k-1} \exp \left( -\frac{1}{8} \epsilon^2 N \right)
+$$
+This leads us to VC dimension:
+
+
+# How does machine learn? VC dimension( d_vc= min_k -1)
+## connection with the last part
+# Generalization with Finite \( d_{vc} \)
+
+Finite \( d_{vc} \) implies that \( g \) 'will' generalize:
+
+$$
+E_{\text{out}}(g) \approx E_{\text{in}}(g)
+$$
+
+This holds:
+- Regardless of learning algorithm \( \mathcal{A} \)
+- Regardless of input distribution \( P \)
+- Regardless of target function \( f \)
+
