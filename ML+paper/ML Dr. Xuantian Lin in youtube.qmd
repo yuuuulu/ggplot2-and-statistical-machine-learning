@@ -1,31 +1,212 @@
 ---
 title: "ML"
+editor: 
+  markdown: 
+    wrap: 72
 ---
 
-# Thanks to Dr. Mu He for recommending @ Machine Learning Foundations (機器學習基石) to me.
+ Thanks to Dr. Mu He for recommending \@ Machine Learning Foundations (機器學習基石) to me.
 
-## PLA
-simple, fast, and used to each demension
+# Key Concepts:
 
-### Introduction
+## Unknown Target Function
 
-The Perceptron Learning Algorithm (PLA) is a fundamental algorithm in machine learning for binary classification. This document provides a detailed proof of the convergence of the PLA, demonstrating that the algorithm will halt after a finite number of updates if the data is linearly separable.
+- **Function (f):** Maps input $$X$$ to output $$y$$.
+  - Ideal classification: $$y = 1$$ (good), $$y = -1$$ (bad).
 
-### Key Definitions and Assumptions
+## D
+
+- **Data (D):** Set of training examples, $$D = \{(x_1, y_1), \ldots, (x_n, y_n)\}$$.
+
+## A
+
+- **Algorithm (A):** Takes data (D) and hypothesis set (H) to produce a hypothesis $g$.
+
+## H
+
+- **Hypothesis Set (H):** An infinite set of potential models or functions.
+  - Linear form: Utilizes lines or hyperplanes in $$\mathbb{R}^d$$ as linear classifiers.
+  
+  
+## g
+g$\approx f$ on D hypothesis
+
+# summary: A takes H(choose the best hypothesis) and D(compare H with D)  to get g.
+As for the whole process: we want the result of $E_{out} \approx 0$ to show that the machine could learn
+we begin with:
+ **Hoeffding's Inequality:**
+  $$
+  P\left( |v - \mu| > \epsilon \right) \leq 2e^{-2\epsilon^2 N}
+  $$
+  and because sample could infer the whole(in could infer out) and also  **Hoeffding's Inequality:** , this could be ensured:
+  $$
+  P\left( |E_{in}(g) - E_{out}(g)| > \epsilon \right) \leq 2e^{-2\epsilon^2 N}
+  $$
+  then we want to ensure small probability of bad data when doing H(hypothesis):
+  
+  
+
+  $$
+  P_D[\text{BAD} \ D] = P_D[\text{BAD} \ D \text{ for } h_1 \text{ or } h_2 \text{ or } \ldots \text{ or } h_m] \leq
+  $$
+  $$
+  P_D[\text{BAD} \ \text{for } h_1] + P_D[\text{BAD} \ \text{for } h_2] + \ldots + P_D[\text{BAD} \ \text{for } h_m] \leq 2M e^{-2\epsilon^2 n}
+  $$
+    for finite M (because we consider here over-estimatedly so we consider infinite situation separately): We acheive our goal(PAC)
+    But for infinite M,
+    we could firstly separate the infinite M into finite number by different kinds of situation(the number of thee effective N)(eg. lines in 2D is infinite but for classification the number of the kind of line $\leq2^N$), so we replace M with the number of thee effective N:
+    $$ P\left( |E_{in}(g) - E_{out}(g)| > \epsilon \right)\leq 2  (effective N) e^{-2\epsilon^2 n}$$
+    here we define the growth function: **Growth Function (m_H(N)):** The maximum number of dichotomies (classifications) over all possible subsets of size N.
+  $$
+  m_H(N) = \max_{(x_1, x_2, \ldots, x_N)} |\{\text{dichotomies of } H \}|
+  $$
+    
+    
+    ** A set of points is shattered by a hypothesis set H if every possible classification can be achieved by some hypothesis in H.
+  $$
+  m_H(N) = 2^N \quad \text{if the set is shattered}
+  $$
+  $$
+  \text{Break Point (k)}: m_H(k) < 2^k
+  $$
+    
+  if we use the growth function to replace the effective N, the polynomial shape reaches our goal but the exponential could not(such as 2D perceptrons)
+  
+  
+  
+  How could we handle it?
+  
+  
+  There are some eg. that the break point restricts max possible growth functio a lot for N>k. The growth function is $\leq $ max possible growth function given k. This brings us idea of proving max possible growth function given k $\leq poly(N)$. In that case, we could regard 2 situations that have the same k as the same situation, regardless of N(hypothesis set).
+  
+  
+  So our new goal becomes to prove the bounding function B(N,k)$\leq$ poly(N)
+  
+  from the special example to the general situation, we get:  $$
+  B(N, k) \leq \sum_{i=0}^{k} \binom{N}{i}
+  $$(here we omit the proof using boundary and inductive formula)
+  
+  
+  So we successfully prove that the growth function is poly(N) if break point exists
+  
+  In summary, we know: $$
+  m_H(N) \leq B(N, k) \leq \sum_{i=0}^{k-1} \binom{N}{i} \leq N^{k-1}
+  $$
+  
+  
+all in all, we know $E_{out} \approx 0$ to show that the machine could learn
+
+
+
+Below are more details ------
+## Linear Classifier
+
+- **Linear Classifier (h):** Hypothesis in the form:
+  $$
+  h(x) = \text{Sign}\left(\sum_{i=1}^{d} w_i x_i - \text{threshold}\right)
+  $$
+  - Simplifies to:
+  $$
+  h(x) = \text{Sign}\left(\sum_{i=1}^{d} w_i x_i\right)
+  $$
+  - Further simplified to:
+  $$
+  h(x) = \text{Sign}(\mathbf{w} \cdot \mathbf{X})
+  $$
+  ---
+title: "Projection and Distance in Classification"
+format: pdf
+---
+
+
+
+
+
+## Perceptron Hypothesis
+
+- **Perceptron Hypothesis:**
+  - Positive output: $$+1$$.
+  - Negative output: $$-1$$.
+  - Simplified linear form:
+  $$
+  \text{Sign}\left(\sum_{i=1}^{d} w_i x_i + (-\text{threshold}) \cdot x_0\right)
+  $$
+  - Further simplified:
+  $$
+  \text{Sign}(\mathbf{w} \cdot \mathbf{X})
+  $$
+
+(Statistical Learning Methods
+
+- **Methods:**
+  - LDA (Linear Discriminant Analysis)
+  - QDA (Quadratic Discriminant Analysis)
+  - Naive Bayes)
+
+### PLA---select g from H
+PLA could iteratively make h(x)(score minus threshold) higher.
+
+
+simple, fast, and used to each demensions
+
+#### Introduction
+
+The Perceptron Learning Algorithm (PLA) is a fundamental algorithm in
+machine learning for binary classification. This document provides a
+detailed proof of the convergence of the PLA, demonstrating that the
+algorithm will halt after a finite number of updates if the data is
+linearly separable.
+
+#### Key Definitions and Assumptions
 
 We start with the following assumptions and definitions:
 
--   **Linearly Separable Data**: There exists a weight vector ( w\^\* ) and a bias ( b\^\* ) such that for all training examples ((x_i, y_i)):
+-   **Linearly Separable Data**: There exists a weight vector ( w\^\* )
+    and a bias ( b\^\* ) such that for all training examples ((x_i,
+    y_i)):
 
     $$
     y_i (w^* \cdot x_i + b^*) > 0
     $$
 
--   **Normalized Weight Vector**: Normalize ( w\^\* ) such that ( \|\|w\^\*\|\| = 1 ).
+-   **Normalized Weight Vector**: Normalize ( w\^\* ) such that (
+    \|\|w\^\*\|\| = 1 ).
+    
+### D is linear separeble
 
-### Perceptron Algorithm Updates
+   = exists perfect w_f such that $y_n=sign(w_f x_n$
+   =$$
+  y_{n(t)} \mathbf{w}_f^T \mathbf{x}_{n(t)} > \min_n y_n \mathbf{w}_f^T \mathbf{x}_n > 0
+  $$(y_n means +/-,$\mathbf{w}_f^T \mathbf{x}_n$ means distance. This means even the min distance is >0, which demonstrates that the line if perfectly seperate 2 kinds of things)
 
-The Perceptron Learning Algorithm updates the weight vector ( w ) and bias ( b ) according to the following rule:
+#### Projection
+
+- **Formula:**
+  $$
+  \frac{\mathbf{w}^T}{\|\mathbf{w}\|} \mathbf{x}_n
+  $$
+
+- **Explanation:** The projection of the weight vector $$\mathbf{w}$$ onto the input vector $$\mathbf{x}_n$$ normalizes by the magnitude of the weight vector. This helps in considering the classification direction denoted by $$y_n$$.
+
+#### Distance Calculation
+
+- **Formula:**
+  $$
+  d = \frac{|\mathbf{w} \cdot \mathbf{x}_n + b|}{\|\mathbf{w}\|}
+  $$
+
+- **Explanation:** The distance $$d$$ is calculated as the absolute value of the dot product of the weight vector $$\mathbf{w}$$ and the input vector $$\mathbf{x}_n$$, plus the bias term $$b$$, all divided by the magnitude of the weight vector $$\mathbf{w}$$. This measures the perpendicular distance of the point $$\mathbf{x}_n$$ from the decision boundary.
+
+#### Relationship
+
+- **Condition:** When the bias term $$b = 0$$, the only difference in classification is determined by the sign of $$y_n$$.
+
+- **Implication:** This emphasizes the role of the weight vector and the input vector in determining the classification outcome, especially when the bias term is not contributing to the decision boundary.
+
+#### Perceptron Algorithm Updates
+
+The Perceptron Learning Algorithm updates the weight vector ( w ) and
+bias ( b ) according to the following rule:
 
 $$
 w_{t+1} = w_t + y_i x_i
@@ -41,9 +222,11 @@ $$
 \gamma = \min_{i} \frac{y_i (w^* \cdot x_i)}{||x_i||}
 $$
 
-This is the minimum distance from the data points to the decision boundary defined by ( w\^\* ). Mistake-Driven Updates
+This is the minimum distance from the data points to the decision
+boundary defined by ( w\^\* ). Mistake-Driven Updates
 
-The weight vector ( w_t ) is changed only when a mistake is made, i.e., when:
+The weight vector ( w_t ) is changed only when a mistake is made, i.e.,
+when:
 
 $$
 \text{sign}(w_t \cdot x_{n(t)}) \neq y_{n(t)} \implies y_{n(t)} w_t^T x_{n(t)} \leq 0
@@ -51,7 +234,8 @@ $$
 
 Bounding the Norm of ( w_t )
 
-A mistake "limits" the growth of ( \|\|w_t\|\|\^2 ), even when updating with the "longest" ( x_n ). Consider the update rule:
+A mistake "limits" the growth of ( \|\|w_t\|\|\^2 ), even when updating
+with the "longest" ( x_n ). Consider the update rule:
 
 $$
 ||w_{t+1}||^2 = ||w_t + y_{n(t)} x_{n(t)}||^2
@@ -85,7 +269,8 @@ $$
 
 Bounding the Number of Mistakes
 
-Using the above inequalities, we can bound the number of updates ( t ) needed to achieve convergence. From the dot product analysis:
+Using the above inequalities, we can bound the number of updates ( t )
+needed to achieve convergence. From the dot product analysis:
 
 $$
 w_t \cdot w^* \geq t \gamma ||x_i||
@@ -113,9 +298,24 @@ $$
 t \leq \frac{1}{\gamma^2}
 $$
 
-### Conclusion
+#### Conclusion
 
-The proof shows that the Perceptron Learning Algorithm will make a finite number of mistakes (updates) before converging to a solution that correctly classifies all the training data, provided the data is linearly separable. The number of updates is bounded by ( \frac{1}{\gamma^2} ), where ( \gamma ) is the margin of separation between the classes. This formal analysis demonstrates the convergence and correctness of the iterative process used by the PLA.
+The proof shows that the Perceptron Learning Algorithm will make a
+finite number of mistakes (updates) before converging to a solution that
+correctly classifies all the training data, provided the data is
+linearly separable. The number of updates is bounded by (
+\frac{1}{\gamma^2} ), where ( \gamma ) is the margin of separation
+between the classes. This formal analysis demonstrates the convergence
+and correctness of the iterative process used by the PLA.
+### Summary of PLA
+
+- **If Linear Separable:**
+  1. $$\mathbf{w}_t^T \mathbf{w}_t$$ grows fast.
+  2. $$\|\mathbf{w}_t\|$$ grows slowly.
+  3. PLA iterations align the weight vector more with the separating hyperplane.
+
+- **Pros:** Simple, fast, and deterministic.
+- **Cons:** Assumes linearly separable data; halting time depends on the data.
 
 #### Explanation of Constant in the video
 
@@ -125,17 +325,28 @@ $$
 \frac{w_T \cdot w^*}{||w_T||} \geq \sqrt{T} \cdot \text{constant}
 $$
 
-refers to a value that depends on the characteristics of the data, particularly the margin (\gamma). The margin (\gamma) is the minimum distance from any data point to the decision boundary. This constant reflects how well-separated the classes are in the feature space. In practical terms, a larger margin (or greater separation) leads to a smaller constant, implying that the algorithm will converge more quickly.
+refers to a value that depends on the characteristics of the data,
+particularly the margin (\gamma). The margin (\gamma) is the minimum
+distance from any data point to the decision boundary. This constant
+reflects how well-separated the classes are in the feature space. In
+practical terms, a larger margin (or greater separation) leads to a
+smaller constant, implying that the algorithm will converge more
+quickly.
 
+## Pocket Algorithm to get g
+PLA+ the best line(which makes the fewest mistakes) = Pocket
+(modify PLA by keeping best weights in pocket)
 
+## PAC
+$E_{in}(g)=E_{out}(g) is PAC$ regardless of A(algrithm)
 
-# Why could machine learn? 
-The Theorem of Generalization ensures it by guaranteeing $E_in$ approximately equal to $E_out$, which could be small. We could explain it from the very beginning which is an interesting and logical process.
+# Why could machine learn?
 
-
+The Theorem of Generalization ensures it by guaranteeing $E_in$
+approximately equal to $E_out$, which could be small. We could explain
+it from the very beginning which is an interesting and logical process.
 
 ## simple intro first
-
 
 Unknown target function:
 
@@ -161,13 +372,13 @@ $$
 \mathcal{A}
 $$
 
-Unknown distribution on \( \mathcal{X} \):
+Unknown distribution on ( \mathcal{X} ):
 
 $$
 P
 $$
 
-Final hypothesis approximating \( f \):
+Final hypothesis approximating ( f ):
 
 $$
 g \approx f
@@ -175,12 +386,35 @@ $$
 
 'Worst case' guarantee on generalization
 
-
 ## target f and g
-## eg of 2D pr
-## PAL based on concentration ..
- 
 
+## eg of 2D pr
+
+## PAL based on concentration inequality..
+- **Hoeffding's Inequality:**
+  $$
+  P\left( |v - \mu| > \epsilon \right) \leq 2e^{-2\epsilon^2 N}
+  $$
+
+- **Error Bound:**
+  $$
+  P\left( |E_{\text{in}}(h) - E_{\text{out}}(h)| > \epsilon \right) \leq 2e^{-2\epsilon^2 n}
+  $$
+  - **Generalization Theorem:**
+  $$
+  P\left( |E_{\text{in}}(g) - E_{\text{out}}(g)| > \epsilon \right) \leq \delta
+  $$
+
+- **Break Point:** Defines the limit for growth function:
+  $$
+  m_H(N) < 2^N
+  $$
+
+- **Bounding Function:**
+  $$
+  B(N, k) \leq \sum_{i=0}^{k} \binom{N}{i}
+  $$
+In summary,
 $$
 \forall g = \mathcal{A}(\mathcal{D}) \in \mathcal{H} \text{ and 'statistical' large } \mathcal{D}, \text{ for } N \ge 2, k \ge 3
 $$
@@ -199,42 +433,38 @@ $$
 4 (2N)^{k-1} \exp \left( -\frac{1}{8} \epsilon^2 N \right)
 $$
 
-
-This leads us to VC dimension(and above is acctually a VC Bound if we replace k-1 with $d_{vc}$:
-
+This leads us to VC dimension(and above is acctually a VC Bound if we
+replace k-1 with $d_{vc}$:
 
 # How does machine learn?----- VC dimension
-( $d_{vc}$= $min_{k-1}$)
-## connection with the last part
-# Generalization with Finite $d_{vc}$ 
 
-Finite $d_{vc}$ implies that \( g \) 'will' generalize:
+( $d_{vc}$= $min_{k-1}$) \## connection with the last part \#
+Generalization with Finite $d_{vc}$
+
+Finite $d_{vc}$ implies that ( g ) 'will' generalize:
 
 $$
 E_{\text{out}}(g) \approx E_{\text{in}}(g)
 $$
 
-This holds:
-- Regardless of learning algorithm \( \mathcal{A} \)
-- Regardless of input distribution \( P \)
-- Regardless of target function \( f \)
-
-
-
-
-
+This holds: - Regardless of learning algorithm ( \mathcal{A} ) -
+Regardless of input distribution ( P ) - Regardless of target function (
+f )
 
 ## VC demension of perceptrons
 
 ### proof of $d_{vc}=d+1$
-(d is the number of the demension of the perceptrons):
-method:  $d_{vc}\leq d+1$ and $d_{vc}\geq d+1$
+
+(d is the number of the demension of the perceptrons): method:
+$d_{vc}\leq d+1$ and $d_{vc}\geq d+1$
 
 #### firstly, $d_{vc}\geq d+1$
-i.e. there exists some d + 1 inputs we can shatter ( reason: $d_{vc}$= $k_{min}-1$ so k $\geq  $ d+2 )
 
-We use this special data to show the existance(d demensional space sattered by d+1 points(vectors)):
- $$
+i.e. there exists some d + 1 inputs we can shatter ( reason: $d_{vc}$=
+$k_{min}-1$ so k \$\geq \$ d+2 )
+
+We use this special data to show the existance(d demensional space
+sattered by d+1 points(vectors)): $$
 X = \begin{bmatrix}
 1 & 0 & 0 & \cdots & 0 \\
 1 & 1 & 0 & \cdots & 0 \\
@@ -242,57 +472,130 @@ X = \begin{bmatrix}
 \vdots & \vdots & \vdots & \ddots & \vdots \\
 1 & 0 & 0 & \cdots & 1
 \end{bmatrix}
-$$
-(*the demension of the perceptron is not the same as the dimensions of a matrix!---so do not confused about sth wasting a lot of time----focus more on the define then maybe we will be more effective*)
+$$ (*the demension of the percepptron is not the same as the demension
+of a matrix!---so do not confused about sth wasting a lot of
+time----focus more on the define then maybe we will be more effective*)
 
+col-1: origin col-2: 1-d 1 weight col-3:2-d 1 weight ... ----1 data of
+origin, d datas ---d+1 data
 
-col-1: origin
-col-2: 1-d 1 weight
-col-3:2-d 1 weight
-...
-     ----1 data of origin, d datas ---d+1 data 
+### ps: I just did not understand shatter very well until now: \<2\^n means the ability of a hypothesis class to perfectly classify every possible combination of labels for a set of points.
 
+So we come back to the proof: d points shatter d+1 demensions means for
+any y in d+1 demensions, there exists a vector w such that sign(Xw)=y.
+So if we could prove Xw=y, we could success. Since X is invertible,
+w=$X^{-1}y$
 
-### ps: I just did not understand shatter very well until now: <2^n means the ability of a hypothesis class to perfectly classify every possible combination of labels for a set of points. 
-
-So we come back to the proof: d points shatter d+1 dimensions means for any y in d+1 dimensions, there exists a vector w such that sign(Xw)=y. So if we could prove Xw=y, we could succeed. Since X is invertible, w=$X^{-1}y$
-
-
-
-#### secondly,  $d_{vc}\leq d+1$ 
+#### secondly, $d_{vc}\leq d+1$
 
 i.e. We cannot shatter any set of d+2 inputs.
 
-Since we just used d+1 points in the last proof, we only need to add one point now. If we add a vector that is linear dependent with the d+1 points(here we use linear dependence to restrict dichotomy). This offers us some instructions.
+Since we just use d+1 points in the last proof, we only need to add one
+point now. If we add a vector which is linear dependent with the d+1
+points(here we use linear dependence to restrivt dichotomy). This offers
+us some instructions.
 
+proof: d+2 rows \> d+1 columns---linear dependent----x_d+2 could be the
+linear combination of those d+1 points
 
+So we will prove :if shatters, For any d+2 points, among the 2\^{d+2}
+situations you want to test, there will be a situation where a_i and
+w\^T w_i have the same sign but the d+2th situation is absolutely
+impossible happends at this point.
 
-proof: d+2 rows > d+1 columns---linear dependent----x_d+2 could be the linear combination of those d+1 points
+Suppose it could be shatter(proof of contradiction)：
 
- So we will prove :if shatters, For any d+2 points, among the 2^{d+2} situations you want to test, there will be a situation where a_i and w^T w_i have the same sign but  the d+2th  situation  is absolutely impossible happends  at this point.
-  
-  Suppose it could be shatter(proof of contradiction)：
-  
-  
-  (I did not understand it so i will not explain until one day i understand)
-  
-  
-  
-## M and d_vc---degree of freedom
+(I did not understand it so i will not explain until one day i
+understand)
+
+## M and d_vc---degree of freedfom
 
 $d_{vc}=d+1:$effective 'binary' degrees of freedom, powerfulness of H.
 
+Since $M=2(2N)^{d_{vc}}$ Small M has too few choices so that A may not
+choose small enough E_in(g); Similarly, small $d_{vc}$ has too limited
+power. Large M (d_vc) may not make sure E_out(g) and E_in(g) close
+enough;Similarly, large $d_{vc}$, either.
 
-Since $M=2(2N)^{d_{vc}}$ 
-Small M has too few choices so that A may not choose small enough E_in(g); Similarly, small $d_{vc}$ has too limited power.
-Large M (d_vc) may not make sure E_out(g) and E_in(g) close enough;Similarly, large $d_{vc}$, either.
-  
 ## VC Bound Rephrase
-a rephrase from  PAC (Probably Approximately Correct) :
- $$ E_{in}(g) - \sqrt{\frac{8}{N} \ln\left(\frac{4(2N)^{d_{VC}}}{\delta}\right)}\leq E_{out}(g) \leq E_{in}(g) + \sqrt{\frac{8}{N} \ln\left(\frac{4(2N)^{d_{VC}}}{\delta}\right)}$$ where $\delta=4 (2N)^{k-1} \exp \left( -\frac{1}{8} \epsilon^2 N \right)$ and g=A(D)in H and statistical large D with $d{vc}\geq 2$ 
-the square-root is the penalty for model complexity(relevant to:N(how many points) H(what is the VC dimension d_vc) $\delta$(how lucky you think you are?????))
 
-  
+a rephrase from PAC (Probably Approximately Correct) :
+$$ E_{in}(g) - \sqrt{\frac{8}{N} \ln\left(\frac{4(2N)^{d_{VC}}}{\delta}\right)}\leq E_{out}(g) \leq E_{in}(g) + \sqrt{\frac{8}{N} \ln\left(\frac{4(2N)^{d_{VC}}}{\delta}\right)}$$
+where
+$\delta=4 (2N)^{k-1} \exp \left( -\frac{1}{8} \epsilon^2 N \right)$ and
+g=A(D)in H and statistical large D with $d{vc}\geq 2$ the square-root is
+the penalty for model complexity(relavent to:N(how many points) H(what
+is the VC dimension d_vc) $\delta$(how lucky you think you are?????))
+\## VC message \### relationship among out-of-sample error, model
+complexity and in-sample error d_vc higher, e_in smaller, model
+complexity higher d_vc smaller, model complexity smaller, e_in higher
+
+```         
+      ------best d_vc in the middle
+           (powerful H not always good)
+```
+
+## Looseness in vc bound
+
+Only N $\approx$ 10000$d_{vc}$ we can ensure the bound is good (E_in and
+E_out are near)
+
+Reason: vc bound is suitable in (1) Hoeffding for unknown $E_{out}$
+---Any distribution, any target (2)\$ m\_{\mathcal{H}}(N) \$ instead of
+\$ \left\|\mathcal{H}(x_1, \ldots, x_N)\right\| \$- 'any' data
+
+(3) \$ N\^{d\_{\text{vc}}} \$ instead of \$ m\_{\mathcal{H}}(N) \$
+
+-   'any' $\mathcal{H}$ of same $d_{\text{vc}}$
+
+(4) Union bound on worst cases
+
+-   any choice made by $A$
+
+so, hardly better and loose for all models similarly.
+
+But actually, N $\approx$ 10$d_{vc}$ is enough in practice.
+
+# Noise and Error
+
+Noise means the target function(actual situation) is not equal to y
+(sample): eg. record information incorrectly so the good user do not
+receive credit card. In that case, is vc bound useful?
+
+**deterministic(**vc bound origin's core(when we prove it before**):**
+f(**x**)(target function) and h(**x**) with x\~p(**x**)
+
+**probabilistic(noisy):** y(comes from sample) and h(**x**) with
+y\~p(y\|**x**)(Bayes posterior probability) and **x**\~p(**x**)
+(deterministic target f is a special case of target
+distribution:p(y\|x)=1 for y=f(x) and p(y\|x)=1 for y not equal to f(x)
+
+p(y\|**x**): **target distribution** characterizes the behavior of
+'mini-target' on one **x ,** which tells us the best prediction
+
+(**recall** the situation when we consider the feasibility of learning:
+we focus on whether the fixed hypothesis **h(x)=target f(x)** and we
+check h on data----**if h(x_n) equals to y_n** to infer what we focus;
+**now we have noise(some y are not = f(x),** )
+
+(ps: the **deterministic** scenario aligns more closely with
+**traditional frequentist approaches** where the relationship between x
+and the output is fixed. In contrast, the **probabilistic** scenario,
+which accounts for noise and uncertainty, aligns more closely with
+**Bayesian approaches**, where the relationship is described using
+probability distributions and prior knowledge is updated with observed
+data.)
+
+vc bound holds for **x** i.i.d.\~p(**x**) and y i.i.d.\~p(y\|**x**),
+i.e. (**x**,y)\~i.i.d.p(**x**,y)
+
+vc still works, **Pocket Algorithm** explains: By maintaining the best
+hypothesis seen so far, the pocket algorithm effectively handles noise,
+ensuring that the empirical risk remains a good estimate of the true
+risk, thus preserving the validity of the VC bound.
+
+But how to get the mini-target? That brings us to the learning goal:
+predict ideal mini-target p(y\|**x**) based on often-seen inputs p(x).
   
   
   
