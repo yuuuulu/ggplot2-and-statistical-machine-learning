@@ -334,8 +334,14 @@ smaller constant, implying that the algorithm will converge more
 quickly.
 
 ## Pocket Algorithm to get g
+noise will lead a situation : each line makes some mistakes
 PLA+ the best line(which makes the fewest mistakes) = Pocket
 (modify PLA by keeping best weights in pocket)
+
+## Revisit PLA/Pocket
+
+if D is linearly separable, target f may not be a linear function (sampling luck)
+if D is not linearly separable, the target function may be linear(noise)
 
 ## PAC
 $E_{in}(g)=E_{out}(g) is PAC$ regardless of A(algrithm)
