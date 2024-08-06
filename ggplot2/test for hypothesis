@@ -1,0 +1,50 @@
+#  Kruskal-Wallis test(ANOVA needs normal hypothesis but qqplot tells it is far from normal distribution)
+
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(readxl)
+library(car)  #Levene’s Test 
+
+
+data <- read_excel("C:/Users/luyu/Desktop/ISLR/data_surf.xlsx", skip = 2)
+
+
+filtered_data <- data %>%
+  filter(!is.na(HR)) %>% 
+  mutate(
+    HR = as.numeric(gsub("[^0-9.-]", "", HR)),  # delete non-mumerical 
+    toxin_1_eng = as.factor(toxin_1_eng) 
+  ) %>%
+  group_by(toxin_1_eng) %>%
+  filter(n() >= 3) %>%  # >=3 number each group 
+  ungroup()
+
+#  Kruskal-Wallis test(ANOVA needs normal hypothesis but qqplot tells it is far from normal distribution)
+kruskal_test_result <- kruskal.test(HR ~ toxin_1_eng, data = filtered_data)
+print(kruskal_test_result)
+
+# box+violin
+p <- ggplot(filtered_data, aes(x = toxin_1_eng, y = HR, fill = toxin_1_eng)) +
+  geom_violin(trim = FALSE, alpha = 0.5) +
+  geom_boxplot(width = 0.1, outlier.shape = NA) +  
+  geom_jitter(color = "black", size = 0.5, alpha = 0.5) +  
+  theme_minimal() +
+  labs(title = "HR Levels by Toxin Type", 
+       x = "Toxin Type", 
+       y = "HR") +
+  theme(axis.text = element_text(size = 20),
+        axis.title.x = element_text(vjust = 0, size = 25, face = "plain"),
+        axis.title.y = element_text(vjust = 0, size = 25, face = "plain"),
+        plot.title = element_text(color = "black", size = 15, face = "plain"),
+        legend.title = element_text(size = 20),
+        legend.text = element_text(size = 15)) +
+  scale_fill_manual(values = colors) +
+  scale_y_continuous(limits = c(0, 200))  # freely and wisely change axis
+
+# add p
+p <- p + geom_text(aes(label = sprintf("p = %.3f", kruskal_test_result$p.value)),
+                   x = 1.5, y = max(filtered_data$HR, na.rm = TRUE) * 0.9,  # change p-value place along y-axis
+                   hjust = 0.5, vjust = 0, size = 7)
+
+print(p)
