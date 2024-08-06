@@ -48,3 +48,73 @@ p <- p + geom_text(aes(label = sprintf("p = %.3f", kruskal_test_result$p.value))
                    hjust = 0.5, vjust = 0, size = 7)
 
 print(p)
+
+
+
+
+
+# x,y is numeric vars, with different colors representing categorical vars.(Mann-Whitney U test)
+# 清空环境
+rm(list = ls())
+
+# 加载必要的包
+library(dplyr)
+library(ggplot2)
+library(readxl)
+
+# 读取 Excel 文件
+data <- read_excel("C:/Users/luyu/Desktop/ISLR/data_surf.xlsx", skip = 2)
+
+# 筛选数据并处理 gastric_lavage_volume、oxygenation_index 和 outcome 列
+filtered_data <- data %>%
+  filter(!is.na(gastric_lavage_volume) & !is.na(oxygenation_index) & !is.na(outcome)) %>%
+  mutate(gastric_lavage_volume = as.factor(gastric_lavage_volume),
+         outcome = as.factor(outcome))
+
+# 检查每个类别中的数据点数量
+table(filtered_data$outcome)
+
+# 检查处理后的数据
+head(filtered_data)
+
+# 动态生成所需颜色数量
+num_colors <- length(unique(filtered_data$gastric_lavage_volume))
+colors <- scales::hue_pal()(num_colors)
+
+# 生成散点图（根据 outcome 使用不同颜色）
+p <- ggplot(filtered_data, aes(x = oxygenation_index, y = gastric_lavage_volume, color = outcome)) +
+  geom_jitter(size = 2, alpha = 0.7) +  # 添加数据点
+  theme_minimal() +
+  labs(title = "Gastric Lavage by Oxygenation Index", 
+       x = "Oxygenation Index", 
+       y = "Gastric Lavage") +
+  theme(axis.text = element_text(size = 20),
+        axis.title.x = element_text(vjust = 0, size = 25, face = "plain"),
+        axis.title.y = element_text(vjust = 0, size = 25, face = "plain"),
+        plot.title = element_text(color = "black", size = 15, face = "plain"),
+        legend.title = element_text(size = 20),
+        legend.text = element_text(size = 15)) +
+  scale_color_manual(values = c("death" = "red", "survive" = "blue"))
+
+# 如果每个类别都有足够的数据点，则进行 Mann-Whitney U 检验
+if (length(unique(filtered_data$outcome)) == 2 && 
+    all(table(filtered_data$outcome) >= 2)) {
+  # 进行 Mann-Whitney U 检验以比较两个组之间的oxygenation_index情况的差异
+  mann_whitney_result <- wilcox.test(oxygenation_index ~ outcome, data = filtered_data)
+  
+  #  Mann-Whitney U test
+  p_value <- mann_whitney_result$p.value
+  
+  # p
+  p <- p + geom_text(aes(label = sprintf("p = %.3f", p_value)),
+                     x = max(filtered_data$oxygenation_index, na.rm = TRUE) * 0.9, 
+                     y = 1.5,  # 修改 p 值的 y 位置
+                     hjust = 0.5, vjust = 0, size = 7)
+} else {
+  # 如果某个类别的数据点不足，打印警告信息
+  warning("Not enough observations in one of the groups for Mann-Whitney U test or more than two levels in outcome.")
+}
+
+
+print(p)
+
